@@ -28,7 +28,7 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
+// @host localhost:8082
 // @BasePath /
 func main() {
 	// Initialize your repository
@@ -53,8 +53,8 @@ func main() {
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	// Start the server
-	log.Println("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	log.Println("Starting server on :8082")
+	if err := http.ListenAndServe(":8082", r); err != nil {
 		log.Fatal(err)
 	}
 }
