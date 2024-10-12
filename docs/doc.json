@@ -1,0 +1,169 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Book Store API",
+      "description": "API for managing books in a bookstore.",
+      "contact": {
+        "name": "Your Name",
+        "email": "your.email@example.com"
+      }
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "schemes": ["http"],
+    "paths": {
+      "/books": {
+        "post": {
+          "summary": "Create a new book",
+          "description": "Adds a new book to the store.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "book",
+              "description": "Book to create",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Book"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Book created",
+              "schema": {
+                "$ref": "#/definitions/Book"
+              }
+            },
+            "400": {
+              "description": "Invalid input"
+            },
+            "500": {
+              "description": "Error adding book"
+            }
+          }
+        },
+        "get": {
+          "summary": "Get all books",
+          "description": "Retrieves a list of all books.",
+          "responses": {
+            "200": {
+              "description": "List of books",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Book"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/books/{id}": {
+        "get": {
+          "summary": "Get book by ID",
+          "description": "Retrieves a book by its ID.",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string",
+              "description": "ID of the book to retrieve"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Book found",
+              "schema": {
+                "$ref": "#/definitions/Book"
+              }
+            },
+            "404": {
+              "description": "Book not found"
+            }
+          }
+        },
+        "put": {
+          "summary": "Update a book",
+          "description": "Updates a book by ID.",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string",
+              "description": "ID of the book to update"
+            },
+            {
+              "in": "body",
+              "name": "book",
+              "description": "Updated book information",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Book"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Book updated",
+              "schema": {
+                "$ref": "#/definitions/Book"
+              }
+            },
+            "400": {
+              "description": "Invalid input"
+            },
+            "404": {
+              "description": "Book not found"
+            },
+            "500": {
+              "description": "Error updating book"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete a book",
+          "description": "Deletes a book by ID.",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string",
+              "description": "ID of the book to delete"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Book deleted"
+            },
+            "404": {
+              "description": "Book not found"
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "Book": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1"
+          },
+          "title": {
+            "type": "string",
+            "example": "Go Programming"
+          },
+          "author": {
+            "type": "string",
+            "example": "John Doe"
+          }
+        }
+      }
+    }
+  }
+  

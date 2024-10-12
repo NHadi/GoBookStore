@@ -1,51 +1,60 @@
+// main.go
+
 package main
 
 import (
-	"BookStore/domain"     // Update with your actual module path
-	"BookStore/repository" // Update with your actual module path
-	"fmt"
+	"log"
+	"net/http"
+
+	"BookStore/application/services"
+	"BookStore/infrastructure/repositories"
+	"BookStore/interfaces/rest"
+
+	_ "BookStore/docs" // Import generated docs
+
+	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title BookStore API
+// @version 1.0
+// @description This is a sample BookStore
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
 func main() {
-	bookRepo := repository.NewInMemoryBookRepository()
-	bookService := domain.NewBookService(bookRepo)
+	// Initialize your repository
+	bookRepo := repositories.NewInMemoryBookRepository()
 
-	// Create Authors
-	author1, _ := domain.NewAuthor("Nurul Hadi")
-	author2, _ := domain.NewAuthor("Jane Doe")
+	// Initialize your application service
+	bookService := services.NewBookApplicationService(bookRepo)
 
-	// Create Books
-	book1 := domain.Book{ID: "1", Title: "Go Programming", Author: author1}
-	bookService.AddBook(book1)
+	// Initialize your REST controller
+	bookController := rest.NewBookController(bookService)
 
-	book2 := domain.Book{ID: "2", Title: "Learn Go", Author: author2}
-	bookService.AddBook(book2)
+	// Set up the router
+	r := mux.NewRouter()
 
-	// Read
-	books := bookService.ListBooks()
-	fmt.Println("Books in the repository:")
-	for _, book := range books {
-		fmt.Printf("ID: %s, Title: %s, Author: %s\n", book.ID, book.Title, book.Author.Name)
-	}
+	// Define your routes
+	r.HandleFunc("/books", bookController.CreateBook).Methods("POST")
+	r.HandleFunc("/books", bookController.GetBooks).Methods("GET")
+	r.HandleFunc("/books/{id}", bookController.UpdateBook).Methods("PUT")
+	r.HandleFunc("/books/{id}", bookController.DeleteBook).Methods("DELETE")
 
-	// Update
-	book2.Title = "Learning Go"
-	bookService.UpdateBook(book2)
+	// Swagger route
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
-	// Read updated books
-	updatedBooks := bookService.ListBooks()
-	fmt.Println("\nBooks after update:")
-	for _, book := range updatedBooks {
-		fmt.Printf("ID: %s, Title: %s, Author: %s\n", book.ID, book.Title, book.Author.Name)
-	}
-
-	// Delete
-	bookService.DeleteBook("1")
-
-	// Read books after deletion
-	booksAfterDeletion := bookService.ListBooks()
-	fmt.Println("\nBooks after deletion:")
-	for _, book := range booksAfterDeletion {
-		fmt.Printf("ID: %s, Title: %s, Author: %s\n", book.ID, book.Title, book.Author.Name)
+	// Start the server
+	log.Println("Starting server on :8080")
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		log.Fatal(err)
 	}
 }
