@@ -55,6 +55,12 @@ func main() {
 	// Swagger route
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
+	// Health check endpoint
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Healthy"))
+	})
+
 	// Start the server
 	log.Println("Starting server on :8082")
 	if err := http.ListenAndServe(":8082", r); err != nil {

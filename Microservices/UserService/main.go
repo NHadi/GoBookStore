@@ -16,7 +16,7 @@ import (
 // @version 1.0
 // @description UserService for managing user accounts
 
-// @host localhost:8081
+// @host user-service:8081  // Change from localhost to user-service
 // @BasePath /
 
 func main() {
@@ -41,9 +41,15 @@ func main() {
 	// Swagger route
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
+	// Health check endpoint
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Healthy"))
+	})
+
 	// Start the server
 	log.Println("Starting UserService on :8081")
-	if err := http.ListenAndServe(":8081", r); err != nil {
+	if err := http.ListenAndServe("0.0.0.0:8081", r); err != nil {
 		log.Fatal(err)
 	}
 }

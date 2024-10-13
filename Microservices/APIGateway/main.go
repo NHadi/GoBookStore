@@ -21,8 +21,8 @@ func main() {
 	// Initialize service configuration
 	serviceConfig := ServiceConfig{
 		ServiceMap: map[string]string{
-			"/books": "http://localhost:8082", // BookService URL
-			"/users": "http://localhost:8081", // UserService URL
+			"/books": "http://book-service:8082", // BookService inside Docker
+			"/users": "http://user-service:8081", // UserService inside Docker
 			// Add other services here as needed
 		},
 	}
