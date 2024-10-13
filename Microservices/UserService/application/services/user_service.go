@@ -16,6 +16,14 @@ func NewUserApplicationService(repo repositories.UserRepository) *UserApplicatio
 	return &UserApplicationService{repo: repo}
 }
 
+func (s *UserApplicationService) CheckUserEligibility(userID string) (bool, error) {
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return false, err
+	}
+	return user.IsEligible, nil
+}
+
 func (s *UserApplicationService) GetAllUsers() ([]*entities.User, error) {
 	return s.repo.List()
 }
@@ -27,9 +35,10 @@ func (s *UserApplicationService) RegisterUser(cmd commands.RegisterUserCommand) 
 	}
 
 	newUser := &entities.User{
-		Name:     cmd.Name,
-		Email:    cmd.Email,
-		Password: cmd.Password, // Password should be hashed
+		Name:       cmd.Name,
+		Email:      cmd.Email,
+		Password:   cmd.Password, // Password should be hashed
+		IsEligible: cmd.IsEligible,
 	}
 
 	if err := s.repo.CreateUser(newUser); err != nil {

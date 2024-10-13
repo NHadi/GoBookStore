@@ -125,6 +125,47 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{userId}/eligibility": {
+            "get": {
+                "description": "Check if a user is eligible based on their ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Check user eligibility",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "isEligible",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -133,6 +174,9 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string"
+                },
+                "isEligible": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -150,6 +194,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "isEligible": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"

@@ -121,3 +121,33 @@ func (c *BookController) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// BorrowBook godoc
+// @Summary Borrow a book
+// @Description Borrow a book for a user
+// @Tags books
+// @Produce json
+// @Param userId path string true "User ID"
+// @Param bookId path string true "Book ID"
+// @Success 200 {string} string "message"
+// @Failure 403 {string} string "error"
+// @Failure 500 {string} string "error"
+// @Router /books/borrow/{userId}/{bookId} [post]
+func (c *BookController) BorrowBook(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	bookId := vars["bookId"]
+
+	message, err := c.service.BorrowBook(userId, bookId)
+	if err != nil {
+		if err.Error() == "user not found" {
+			http.Error(w, `{"error": "User not found"}`, http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(message))
+}

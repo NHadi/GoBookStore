@@ -31,11 +31,14 @@ import (
 // @host localhost:8082
 // @BasePath /
 func main() {
+
+	// Define the UserService URL
+	gatewayServiceURL := "http://localhost:8080"
 	// Initialize your repository
 	bookRepo := repositories.NewInMemoryBookRepository()
 
 	// Initialize your application service
-	bookService := services.NewBookApplicationService(bookRepo)
+	bookService := services.NewBookApplicationService(bookRepo, gatewayServiceURL)
 
 	// Initialize your REST controller
 	bookController := rest.NewBookController(bookService)
@@ -48,7 +51,7 @@ func main() {
 	r.HandleFunc("/books", bookController.GetBooks).Methods("GET")
 	r.HandleFunc("/books/{id}", bookController.UpdateBook).Methods("PUT")
 	r.HandleFunc("/books/{id}", bookController.DeleteBook).Methods("DELETE")
-
+	r.HandleFunc("/books/borrow/{userId}/{bookId}", bookController.BorrowBook).Methods("POST")
 	// Swagger route
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 

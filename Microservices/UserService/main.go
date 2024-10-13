@@ -36,6 +36,7 @@ func main() {
 	r.HandleFunc("/users", userController.GetAllUsers).Methods("GET")
 	r.HandleFunc("/users", userController.RegisterUser).Methods("POST")
 	r.HandleFunc("/users/{id}", userController.GetUser).Methods("GET")
+	r.HandleFunc("/users/{userId}/eligibility", userController.CheckUserEligibility).Methods("GET")
 
 	// Swagger route
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)

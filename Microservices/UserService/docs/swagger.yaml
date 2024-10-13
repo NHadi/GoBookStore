@@ -4,6 +4,8 @@ definitions:
     properties:
       email:
         type: string
+      isEligible:
+        type: boolean
       name:
         type: string
       password:
@@ -15,6 +17,8 @@ definitions:
         type: string
       id:
         type: string
+      isEligible:
+        type: boolean
       name:
         type: string
       password:
@@ -100,6 +104,33 @@ paths:
               type: string
             type: object
       summary: Get a user by ID
+      tags:
+      - users
+  /users/{userId}/eligibility:
+    get:
+      description: Check if a user is eligible based on their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: isEligible
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Check user eligibility
       tags:
       - users
 swagger: "2.0"

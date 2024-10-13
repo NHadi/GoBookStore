@@ -18,6 +18,45 @@ func NewUserController(service *services.UserApplicationService) *UserController
 	return &UserController{service: service}
 }
 
+// CheckUserEligibility godoc
+// @Summary Check user eligibility
+// @Description Check if a user is eligible based on their ID
+// @Tags users
+// @Produce json
+// @Param userId path string true "User ID"
+// @Success 200 {object} map[string]bool "isEligible"
+// @Failure 404 {object} map[string]string "error"
+// @Router /users/{userId}/eligibility [get]
+func (c *UserController) CheckUserEligibility(w http.ResponseWriter, r *http.Request) {
+	// Extract userId from URL parameters
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	// Call the UserService to check eligibility
+	isEligible, err := c.service.CheckUserEligibility(userId)
+	if err != nil {
+		// Handle the error case (e.g., user not found)
+		if err.Error() == "user not found" {
+			http.Error(w, `{"error": "User not found"}`, http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Failed to check user eligibility", http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare response
+	response := map[string]bool{"isEligible": isEligible}
+
+	// Set the header content type to application/json
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	// Encode the response to JSON
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Error encoding response", http.StatusInternalServerError)
+	}
+}
+
 // RegisterUser godoc
 // @Summary Register a new user
 // @Description Register a new user with the provided details

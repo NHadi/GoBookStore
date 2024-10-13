@@ -178,4 +178,36 @@ paths:
       summary: Update a book
       tags:
       - books
+  /books/borrow/{userId}/{bookId}:
+    post:
+      description: Borrow a book for a user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Book ID
+        in: path
+        name: bookId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: string
+        "403":
+          description: error
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Borrow a book
+      tags:
+      - books
 swagger: "2.0"
