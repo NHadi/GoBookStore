@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   api-gateway:
     build:
@@ -29,6 +30,49 @@ services:
       - "8082:8082"
     networks:
       - microservices-network
+    depends_on:
+      - cassandra
+      - elasticsearch
+
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=BookStoreCluster
+      - CASSANDRA_DC=dc1
+      - CASSANDRA_REPLICATION_FACTOR=1
+    networks:
+      - microservices-network
+
+  elasticsearch:
+    image: elasticsearch:7.10.1
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=your_password_here
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - microservices-network
+
+  kibana:
+    image: kibana:7.10.1
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=your_password_here
+    networks:
+      - microservices-network
+
+volumes:
+  esdata:
 
 networks:
   microservices-network:

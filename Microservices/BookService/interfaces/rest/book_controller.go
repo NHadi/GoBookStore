@@ -7,6 +7,7 @@ import (
 	"BookStore/application/commands"
 	"BookStore/application/queries"
 	"BookStore/application/services"
+	"BookStore/domain/entities"
 
 	"github.com/gorilla/mux"
 )
@@ -45,6 +46,33 @@ func (c *BookController) CreateBook(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(book)
+}
+
+func (c *BookController) SearchBooks(w http.ResponseWriter, r *http.Request) {
+	// Get the query parameter
+	query := r.URL.Query().Get("query")
+
+	// Call the service to search for books
+	books, err := c.service.SearchBooks(query)
+	if err != nil {
+		http.Error(w, "Error searching for books", http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare the response with pointers
+	bookPointers := make([]*entities.Book, len(books))
+	for i := range books {
+		bookPointers[i] = &books[i] // Convert each book to a pointer
+	}
+
+	response := BooksResponse{
+		Count: len(bookPointers),
+		Books: bookPointers, // Now this is a slice of pointers
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // GetBooks godoc

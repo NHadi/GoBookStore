@@ -10,8 +10,6 @@ import (
 	"BookStore/infrastructure/repositories"
 	"BookStore/interfaces/rest"
 
-	_ "BookStore/docs" // Import generated docs
-
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -31,14 +29,23 @@ import (
 // @host localhost:8082
 // @BasePath /
 func main() {
-
 	// Define the UserService URL
 	gatewayServiceURL := "http://localhost:8080"
-	// Initialize your repository
-	bookRepo := repositories.NewInMemoryBookRepository()
 
-	// Initialize your application service
-	bookService := services.NewBookApplicationService(bookRepo, gatewayServiceURL)
+	// Initialize Cassandra repository
+	cassandraRepo, err := repositories.NewCassandraBookRepository()
+	if err != nil {
+		log.Fatalf("Failed to initialize Cassandra repository: %v", err)
+	}
+
+	// Initialize Elasticsearch repository
+	elasticRepo, err := repositories.NewElasticsearchBookRepository()
+	if err != nil {
+		log.Fatalf("Failed to initialize Elasticsearch repository: %v", err)
+	}
+
+	// Initialize your application service with both repositories
+	bookService := services.NewBookApplicationService(cassandraRepo, elasticRepo, gatewayServiceURL)
 
 	// Initialize your REST controller
 	bookController := rest.NewBookController(bookService)
@@ -52,6 +59,7 @@ func main() {
 	r.HandleFunc("/books/{id}", bookController.UpdateBook).Methods("PUT")
 	r.HandleFunc("/books/{id}", bookController.DeleteBook).Methods("DELETE")
 	r.HandleFunc("/books/borrow/{userId}/{bookId}", bookController.BorrowBook).Methods("POST")
+	r.HandleFunc("/books/search", bookController.SearchBooks).Methods("GET")
 	// Swagger route
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 

@@ -9,4 +9,7 @@ type BookRepository interface {
 	FindById(id string) (*entities.Book, error)
 	Update(book *entities.Book) error
 	Delete(id string) error
+	// following methods for Elasticsearch operations
+	IndexBook(book *entities.Book) error
+	SearchBooks(title string) ([]entities.Book, error)
 }

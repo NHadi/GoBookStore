@@ -11,40 +11,69 @@ import (
 )
 
 type BookApplicationService struct {
-	repo              repositories.BookRepository
+	cassandraRepo     repositories.BookRepository
+	elasticsearchRepo repositories.BookRepository
 	gatewayServiceURL string
 }
 
-func NewBookApplicationService(repo repositories.BookRepository, gatewayServiceURL string) *BookApplicationService {
-	return &BookApplicationService{repo: repo, gatewayServiceURL: gatewayServiceURL}
+func NewBookApplicationService(cassandraRepo, elasticsearchRepo repositories.BookRepository, gatewayServiceURL string) *BookApplicationService {
+	return &BookApplicationService{
+		cassandraRepo:     cassandraRepo,
+		elasticsearchRepo: elasticsearchRepo,
+		gatewayServiceURL: gatewayServiceURL,
+	}
 }
 
 func (s *BookApplicationService) AddBook(cmd commands.AddBookCommand) (*entities.Book, error) {
-	return cmd.Handle(s.repo)
+	book, err := cmd.Handle(s.cassandraRepo)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.elasticsearchRepo.IndexBook(book); err != nil {
+		return nil, err
+	}
+
+	return book, nil
 }
 
 func (s *BookApplicationService) ListBooks(q queries.GetBooksQuery) []*entities.Book {
-	return q.Handle(s.repo)
+	return q.Handle(s.elasticsearchRepo)
 }
 
-// FindByID retrieves a book by its ID.
 func (s *BookApplicationService) FindByID(id string) (*entities.Book, error) {
-	return s.repo.FindById(id)
+	book, err := s.cassandraRepo.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+	return book, nil
 }
 
-// Update updates a book's details.
 func (s *BookApplicationService) Update(book *entities.Book) error {
-	return s.repo.Update(book)
+	if err := s.cassandraRepo.Update(book); err != nil {
+		return err
+	}
+
+	if err := s.elasticsearchRepo.IndexBook(book); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// Delete removes a book by its ID.
 func (s *BookApplicationService) Delete(id string) error {
-	return s.repo.Delete(id)
+	if err := s.cassandraRepo.Delete(id); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// BorrowBook checks user eligibility and processes book borrowing
+func (s *BookApplicationService) SearchBooks(title string) ([]entities.Book, error) {
+	return s.elasticsearchRepo.SearchBooks(title)
+}
+
 func (s *BookApplicationService) BorrowBook(userId string, bookId string) (string, error) {
-	// Check user eligibility by calling UserService
 	isEligible, err := s.checkUserEligibility(userId)
 	if err != nil {
 		return "", err
@@ -59,7 +88,6 @@ func (s *BookApplicationService) BorrowBook(userId string, bookId string) (strin
 	return fmt.Sprintf("User %s successfully borrowed book %s", userId, bookId), nil
 }
 
-// checkUserEligibility makes an HTTP call to UserService to check eligibility
 func (s *BookApplicationService) checkUserEligibility(userId string) (bool, error) {
 	resp, err := http.Get(fmt.Sprintf("%s/users/%s/eligibility", s.gatewayServiceURL, userId))
 	if err != nil {
