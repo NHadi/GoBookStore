@@ -5,7 +5,7 @@ This repository contains the architecture and implementation of a BookStore appl
 
 ## Architecture Overview
 
-![BookStore Microservices Architecture](A_system_design_architecture_diagram_illustrating_.png)
+![BookStore Microservices Architecture](A_system_design_architecture_diagram_illustrating_.png.webp)
 
 ### Components
 
