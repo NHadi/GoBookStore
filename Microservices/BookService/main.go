@@ -26,11 +26,11 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8082
+// @host book-service:8082
 // @BasePath /
 func main() {
 	// Define the UserService URL
-	gatewayServiceURL := "http://localhost:8080"
+	gatewayServiceURL := "http://api-gateway:8080"
 
 	// Initialize Cassandra repository
 	cassandraRepo, err := repositories.NewCassandraBookRepository()
@@ -71,7 +71,7 @@ func main() {
 
 	// Start the server
 	log.Println("Starting server on :8082")
-	if err := http.ListenAndServe(":8082", r); err != nil {
+	if err := http.ListenAndServe("0.0.0.0:8082", r); err != nil {
 		log.Fatal(err)
 	}
 }
